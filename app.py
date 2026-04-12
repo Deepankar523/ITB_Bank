@@ -160,7 +160,19 @@ def show():
     db = get_db_connection()
     cur = db.cursor(dictionary=True)
 
-    cur.execute("SELECT * FROM users WHERE role!='admin'")
+    cur.execute("""
+    SELECT 
+        u.*, 
+        a.balance, 
+        a.account_number, 
+        a.account_type,
+        COALESCE(SUM(l.amount - l.amount_paid), 0) AS active_loan_amt
+    FROM users u
+    JOIN accounts a ON u.user_id = a.user_id
+    LEFT JOIN loans l ON u.user_id = l.user_id AND l.status = 'approved'
+    WHERE u.role != 'admin'
+    GROUP BY u.user_id
+""")
     data = cur.fetchall()
 
     db.close()
