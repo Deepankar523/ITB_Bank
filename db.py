@@ -1,3 +1,4 @@
+
 import mysql.connector
 import os
 
@@ -9,3 +10,4 @@ def get_db_connection():
         database=os.getenv("DB_NAME"),
         port=3306
     )
+

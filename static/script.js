@@ -23,4 +23,6 @@ document.addEventListener('DOMContentLoaded', function () {
             setTimeout(function () { alert.remove(); }, 500);
         }, 4000);
     });
+
 });
+

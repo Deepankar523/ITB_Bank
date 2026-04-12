@@ -195,4 +195,5 @@ tr:hover td { background: #fafbfd; }
 .credit-bar-wrap { background: rgba(0,0,0,0.12); border-radius: 20px; height: 12px; overflow: hidden; }
 .credit-bar { height: 100%; width: 0; border-radius: 20px; background: linear-gradient(90deg, #e74c3c 0%, #f39c12 40%, #27ae60 100%); transition: width 1s ease; }
 .credit-range { display: flex; justify-content: space-between; font-size: 0.68rem; color: var(--muted); text-align: center; }
+
 .credit-info { font-size: 0.85rem; color: var(--text); }
