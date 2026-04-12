@@ -8,7 +8,7 @@ app.secret_key = "itb_bank_super_secret_2024"
 
 FD_RATES = {3: 6.0, 6: 6.5, 12: 7.0, 24: 7.5, 36: 8.0}
 
-# ───────────────────────── HELPERS ─────────────────────────
+# ───────── HELPERS ─────────
 
 def fix_email(email):
     if "@" not in email:
@@ -36,7 +36,6 @@ def admin_required(f):
 def ensure_admin():
     db = get_db_connection()
     cur = db.cursor(dictionary=True)
-
     cur.execute("SELECT * FROM users WHERE email='admin@itb.org'")
     if not cur.fetchone():
         cur.execute(
@@ -44,44 +43,9 @@ def ensure_admin():
             ("Admin", "admin@itb.org", "1234", "admin")
         )
         db.commit()
-
     db.close()
 
-# ✅ FIXED FUNCTION
-def calc_credit_score(db, user_id):
-    cur = db.cursor(dictionary=True)
-
-    cur.execute("""
-        SELECT a.balance, u.created_at
-        FROM accounts a
-        JOIN users u ON a.user_id = u.user_id
-        WHERE a.user_id=%s
-    """, (user_id,))
-    acc = cur.fetchone()
-
-    balance = float(acc['balance']) if acc else 0
-    acc_age = (date.today() - acc['created_at'].date()).days if acc else 0
-
-    score = 300
-
-    if balance >= 10000: score += 80
-    if balance >= 50000: score += 100
-    if balance >= 100000: score += 120
-    if acc_age >= 30: score += 60
-    if acc_age >= 180: score += 80
-
-    score = max(300, min(900, score))
-
-    if score >= 750:
-        return score, "Excellent", True
-    elif score >= 650:
-        return score, "Good", True
-    elif score >= 550:
-        return score, "Fair", False
-    else:
-        return score, "Poor", False
-
-# ───────────────────────── ROUTES ─────────────────────────
+# ───────── ROUTES ─────────
 
 @app.route('/')
 def home():
@@ -150,7 +114,7 @@ def dashboard():
     db.close()
     return render_template('dashboard.html', account=acc)
 
-# ───────────────── ADMIN ─────────────────
+# ───────── ADMIN (FIXED) ─────────
 
 @app.route('/admin')
 @admin_required
@@ -159,20 +123,13 @@ def admin():
     cur = db.cursor(dictionary=True)
 
     cur.execute("SELECT * FROM users WHERE role!='admin'")
-    users = cur.fetchall()
-
-    customers = []
-    for c in users:
-        score, band, _ = calc_credit_score(db, c['user_id'])
-        c['credit_score'] = score
-        c['cibil_band'] = band
-        customers.append(c)
+    customers = cur.fetchall()
 
     db.close()
 
     return render_template('admin.html', customers=customers)
 
-# ───────────────── SHOW ─────────────────
+# ───────── SHOW (FIXED) ─────────
 
 @app.route('/show')
 @admin_required
@@ -181,35 +138,20 @@ def show():
     cur = db.cursor(dictionary=True)
 
     cur.execute("SELECT * FROM users WHERE role!='admin'")
-    users = cur.fetchall()
-
-    data = []
-    for c in users:
-        score, band, _ = calc_credit_score(db, c['user_id'])
-        c['credit_score'] = score
-        c['cibil_band'] = band
-        data.append(c)
+    data = cur.fetchall()
 
     db.close()
 
     return render_template('show.html', data=data)
 
-# ───────────────── LOAN ─────────────────
+# ───────── LOAN (SIMPLIFIED) ─────────
 
 @app.route('/loan', methods=['GET','POST'])
 @login_required
 def loan():
-    db = get_db_connection()
+    return render_template('loan.html')
 
-    credit_score, cibil_band, auto = calc_credit_score(db, session['user_id'])
-
-    db.close()
-
-    return render_template('loan.html',
-                           credit_score=credit_score,
-                           cibil_band=cibil_band)
-
-# ───────────────── RUN ─────────────────
+# ───────── RUN ─────────
 
 if __name__ == "__main__":
     ensure_admin()
