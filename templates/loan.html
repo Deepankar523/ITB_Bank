@@ -1,0 +1,175 @@
+{% extends "base.html" %}
+{% block title %}ITB Bank – Loans{% endblock %}
+{% block content %}
+
+<h1 class="page-title">💳 Loan Center</h1>
+
+<!-- CREDIT SCORE CARD -->
+{% set bar_pct = ((credit_score - 300) / 600 * 100) | int %}
+{% set bar_pct = [bar_pct, 100] | min %}
+{% set bar_pct = [bar_pct, 0]   | max %}
+
+<div class="credit-card credit-{{ cibil_band | lower }}">
+  <div class="credit-left">
+    <div class="credit-label">Your CIBIL / Credit Score</div>
+    <div class="credit-score-num">{{ credit_score }}</div>
+    <div class="credit-band-text">{{ cibil_band }}</div>
+  </div>
+  <div class="credit-right">
+    <div class="credit-bar-wrap">
+      <div class="credit-bar" id="creditBar" data-width="{{ bar_pct }}"></div>
+    </div>
+    <div class="credit-range">
+      <span>300<br><small>Poor</small></span>
+      <span>550<br><small>Fair</small></span>
+      <span>650<br><small>Good</small></span>
+      <span>900<br><small>Excellent</small></span>
+    </div>
+    <div class="credit-info">
+      {% if cibil_band == 'Excellent' %}
+        ✅ Auto-approved at <strong>12% p.a.</strong>
+      {% elif cibil_band == 'Good' %}
+        ✅ Auto-approved at <strong>14% p.a.</strong>
+      {% elif cibil_band == 'Fair' %}
+        ⏳ Eligible — requires <strong>admin approval</strong> at 18% p.a.
+      {% else %}
+        ❌ Score too low. Deposit more and make transactions to improve.
+      {% endif %}
+    </div>
+  </div>
+</div>
+
+<div class="grid-2" style="align-items:start;margin-top:1.5rem;">
+
+  <!-- APPLY -->
+  <div class="card">
+    <h3 class="card-title">Apply for a Loan</h3>
+
+    {% if errors %}
+    <div class="alert alert-error">
+      {% for e in errors %}<div>⚠ {{ e }}</div>{% endfor %}
+    </div>
+    {% endif %}
+
+    {% if credit_score >= 550 %}
+    <form method="post">
+      <div class="form-group">
+        <label>Loan Amount (₹) <span class="req">*</span></label>
+        <input type="number" name="amount" placeholder="Minimum ₹1000" min="1000" step="1" required/>
+      </div>
+      <div class="form-group">
+        <label>Purpose <span class="req">*</span></label>
+        <select name="purpose" required>
+          <option value="">Select purpose</option>
+          <option value="Home Renovation">Home Renovation</option>
+          <option value="Education">Education</option>
+          <option value="Medical Emergency">Medical Emergency</option>
+          <option value="Business">Business</option>
+          <option value="Vehicle">Vehicle</option>
+          <option value="Personal">Personal</option>
+          <option value="Other">Other</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Duration <span class="req">*</span></label>
+        <select name="duration" required>
+          <option value="">Select duration</option>
+          <option value="6">6 months</option>
+          <option value="12">12 months</option>
+          <option value="24">24 months</option>
+          <option value="36">36 months</option>
+          <option value="60">60 months</option>
+        </select>
+      </div>
+      <div class="info-box" style="font-size:0.83rem;margin-bottom:0.75rem;">
+        💡 Your interest rate based on CIBIL score:
+        <strong>
+          {% if credit_score >= 750 %}12% p.a.
+          {% elif credit_score >= 650 %}14% p.a.
+          {% else %}18% p.a.{% endif %}
+        </strong>
+      </div>
+      <button type="submit" class="btn btn-primary btn-full">Apply Now</button>
+    </form>
+    {% else %}
+    <div class="alert alert-error">
+      Your CIBIL score ({{ credit_score }}) is too low. Minimum required: 550.
+    </div>
+    <div style="font-size:0.87rem;color:var(--muted);margin-top:0.75rem;">
+      <strong>How to improve your score:</strong>
+      <ul style="margin-top:0.5rem;padding-left:1.2rem;line-height:1.8;">
+        <li>Keep account balance above ₹10,000</li>
+        <li>Maintain balance above ₹50,000 for a bigger boost</li>
+        <li>Make more deposits and transfers (5+ transactions)</li>
+        <li>Repay any existing loans on time</li>
+        <li>Avoid having multiple active loans</li>
+      </ul>
+    </div>
+    {% endif %}
+  </div>
+
+  <!-- MY LOANS -->
+  <div class="card">
+    <h3 class="card-title">My Loans</h3>
+    {% if loans %}
+      {% for l in loans %}
+      <div class="loan-item">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:0.5rem;">
+          <div>
+            <div style="font-weight:600;font-size:1rem;">
+              ₹{{ "%.2f"|format(l.amount) }} &mdash; {{ l.purpose }}
+            </div>
+            <div style="font-size:0.8rem;color:var(--muted);margin-top:0.2rem;">
+              {{ l.duration_months }} months @ {{ l.interest_rate }}% p.a.
+              &nbsp;|&nbsp; EMI: ₹{{ "%.2f"|format(l.emi) }}
+            </div>
+            <div style="font-size:0.78rem;color:var(--muted);margin-top:0.15rem;">
+              Paid: ₹{{ "%.2f"|format(l.amount_paid) }}
+              &nbsp;|&nbsp; CIBIL at application: {{ l.credit_score }}
+            </div>
+            <div style="font-size:0.76rem;color:var(--muted);margin-top:0.1rem;">
+              Applied: {{ l.applied_at.strftime('%d %b %Y') }}
+            </div>
+          </div>
+          <span class="badge
+            {% if l.status == 'approved' %}badge-deposit
+            {% elif l.status == 'pending' %}badge-transfer
+            {% elif l.status == 'closed' %}badge-deposit
+            {% else %}badge-withdrawal{% endif %}"
+            style="white-space:nowrap;flex-shrink:0;">
+            {% if l.status == 'closed' %}✅ Closed
+            {% elif l.status == 'approved' %}Active
+            {% elif l.status == 'pending' %}Pending
+            {% else %}Rejected{% endif %}
+          </span>
+        </div>
+        {% if l.status == 'approved' %}
+        <form method="post" action="/loan/repay/{{ l.loan_id }}" style="margin-top:0.6rem;">
+          <button type="submit" class="btn btn-outline btn-full" style="font-size:0.83rem;">
+            Pay EMI — ₹{{ "%.2f"|format(l.emi) }}
+          </button>
+        </form>
+        {% endif %}
+      </div>
+      {% endfor %}
+    {% else %}
+      <p style="color:var(--muted);font-size:0.9rem;padding:0.5rem 0;">No loan applications yet.</p>
+    {% endif %}
+  </div>
+</div>
+
+<div style="margin-top:1.25rem;">
+  <a href="/dashboard" class="btn btn-outline">← Back to Dashboard</a>
+</div>
+
+<script>
+  // Animate the credit bar on page load — no Jinja2 inside JS
+  window.addEventListener('load', function() {
+    var bar = document.getElementById('creditBar');
+    if (bar) {
+      bar.style.width = bar.getAttribute('data-width') + '%';
+    }
+  });
+</script>
+
+{% endblock %}
