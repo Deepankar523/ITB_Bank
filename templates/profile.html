@@ -1,0 +1,101 @@
+{% extends "base.html" %}
+{% block title %}ITB Bank – My Profile{% endblock %}
+{% block content %}
+
+<h1 class="page-title">👤 My Profile</h1>
+
+<div class="grid-2">
+
+  <!-- ACCOUNT INFO -->
+  <div class="card">
+    <h3 class="card-title">Account Details</h3>
+    <div class="info-row">
+      <span class="info-label">Name</span>
+      <span>{{ user.name }}</span>
+    </div>
+    <div class="info-row">
+      <span class="info-label">Email</span>
+      <span style="font-size:0.88rem;">{{ user.email }}</span>
+    </div>
+    <div class="info-row">
+      <span class="info-label">Phone</span>
+      <span>{{ user.phone if user.phone else 'Not set' }}</span>
+    </div>
+    <div class="info-row">
+      <span class="info-label">Account No.</span>
+      <span style="letter-spacing:0.05em;font-weight:600;">{{ user.account_number }}</span>
+    </div>
+    <div class="info-row">
+      <span class="info-label">Account Type</span>
+      <span style="text-transform:capitalize;">{{ user.account_type }}</span>
+    </div>
+    <div class="info-row">
+      <span class="info-label">Balance</span>
+      <span style="color:var(--success);font-weight:700;font-size:1.1rem;">
+        ₹{{ "%.2f"|format(user.balance) }}
+      </span>
+    </div>
+    <div class="info-row">
+      <span class="info-label">Member Since</span>
+      <span>{{ user.acc_created.strftime('%d %b %Y') }}</span>
+    </div>
+  </div>
+
+  <div>
+    <!-- CHANGE PIN -->
+    <div class="card" style="margin-bottom:1.25rem;">
+      <h3 class="card-title">🔑 Change PIN</h3>
+      <form method="post">
+        <input type="hidden" name="action" value="change_pin"/>
+        <div class="form-group">
+          <label>Current PIN</label>
+          <div class="input-eye">
+            <input type="password" name="old_pin" id="old_pin"
+                   placeholder="Enter current PIN" required/>
+            <span class="eye-btn" onclick="toggleEye('old_pin', this)">👁</span>
+          </div>
+        </div>
+        <div class="form-group">
+          <label>New PIN</label>
+          <div class="input-eye">
+            <input type="password" name="new_pin" id="new_pin"
+                   placeholder="At least 4 characters" required/>
+            <span class="eye-btn" onclick="toggleEye('new_pin', this)">👁</span>
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Confirm New PIN</label>
+          <div class="input-eye">
+            <input type="password" name="confirm_pin" id="confirm_pin"
+                   placeholder="Repeat new PIN" required/>
+            <span class="eye-btn" onclick="toggleEye('confirm_pin', this)">👁</span>
+          </div>
+        </div>
+        <button type="submit" class="btn btn-primary btn-full">Update PIN</button>
+      </form>
+    </div>
+
+    <!-- UPDATE PHONE -->
+    <div class="card">
+      <h3 class="card-title">📱 Update Phone Number</h3>
+      <form method="post">
+        <input type="hidden" name="action" value="update_phone"/>
+        <div class="form-group">
+          <label>Phone Number</label>
+          <input type="text" name="phone"
+                 placeholder="Enter 10-digit number"
+                 value="{{ user.phone if user.phone else '' }}"
+                 maxlength="15" required/>
+        </div>
+        <button type="submit" class="btn btn-primary btn-full">Save Phone</button>
+      </form>
+    </div>
+  </div>
+
+</div>
+
+<div style="margin-top:1rem;">
+  <a href="/dashboard" class="btn btn-outline">← Back to Dashboard</a>
+</div>
+
+{% endblock %}
