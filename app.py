@@ -135,7 +135,12 @@ def admin():
     total_txns = cur.fetchone()['c']
 
     # customers
-    cur.execute("SELECT * FROM users WHERE role!='admin'")
+    cur.execute("""
+    SELECT u.*, a.balance, a.account_number, a.account_type
+    FROM users u
+    JOIN accounts a ON u.user_id = a.user_id
+    WHERE u.role != 'admin'
+""")
     customers = cur.fetchall()
 
     db.close()
