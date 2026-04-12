@@ -1,4 +1,3 @@
-
 from flask import Flask, request, redirect, session, render_template, flash, send_file
 from db import get_db_connection
 from decimal import Decimal, InvalidOperation
@@ -962,4 +961,4 @@ def admin_user_loans(uid):
 
 if __name__ == "__main__":
     ensure_admin()
-
+    app.run(debug=True)
