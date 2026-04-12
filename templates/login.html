@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% block title %}ITB Bank – Login{% endblock %}
+{% block content %}
+
+<div class="form-page">
+  <div class="form-card">
+    <h2>Access Your Account</h2>
+    <p class="form-sub">Enter your username (without @itb.org) or full email</p>
+
+    {% if error %}
+    <div class="alert alert-error">{{ error }}</div>
+    {% endif %}
+
+    <form action="/login" method="post">
+      <div class="form-group">
+        <label>Email / Username</label>
+        <input type="text" name="email" placeholder="e.g. john or john@gmail.com" required/>
+        <small>If you type just a name, @itb.org is added automatically</small>
+      </div>
+      <div class="form-group">
+        <label>PIN</label>
+        <div class="input-eye">
+          <input type="password" name="pin" id="pin" placeholder="Enter your PIN" required/>
+          <span class="eye-btn" onclick="toggleEye('pin', this)">👁</span>
+        </div>
+      </div>
+      <button type="submit" class="btn btn-primary btn-full">Login</button>
+    </form>
+
+    <div class="form-footer">
+      <a href="/create">Don't have an account? Create one</a>
+    </div>
+  </div>
+</div>
+
+{% endblock %}

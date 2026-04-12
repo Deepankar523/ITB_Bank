@@ -1,0 +1,90 @@
+{% extends "base.html" %}
+{% block title %}ITB Bank – Fixed Deposits{% endblock %}
+{% block content %}
+
+<h1 class="page-title">🏦 Fixed Deposits</h1>
+
+<div class="grid-2" style="align-items:start;">
+
+  <!-- CREATE FD FORM -->
+  <div class="card">
+    <h3 class="card-title">Create New FD</h3>
+
+    {% if errors %}
+    <div class="alert alert-error">{% for e in errors %}<div>⚠ {{ e }}</div>{% endfor %}</div>
+    {% endif %}
+
+    <!-- RATE TABLE -->
+    <div class="rate-table">
+      <div class="rate-title">Current FD Interest Rates</div>
+      <table>
+        <thead><tr><th>Duration</th><th>Interest Rate</th><th>Returns on ₹10,000</th></tr></thead>
+        <tbody>
+          {% for months, rate in rates.items() %}
+          <tr>
+            <td>{{ months }} months</td>
+            <td style="color:var(--success);font-weight:600">{{ rate }}% p.a.</td>
+            <td>₹{{ "%.0f"|format(10000 * (1 + rate/100 * months/12)) }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+    <form method="post" style="margin-top:1rem;">
+      <div class="form-group">
+        <label>Amount (₹) — Minimum ₹1000 <span class="req">*</span></label>
+        <input type="number" name="amount" placeholder="Enter amount" min="1000" required/>
+      </div>
+      <div class="form-group">
+        <label>Duration <span class="req">*</span></label>
+        <select name="duration" required>
+          <option value="">Select duration</option>
+          {% for months, rate in rates.items() %}
+          <option value="{{ months }}">{{ months }} months — {{ rate }}% p.a.</option>
+          {% endfor %}
+        </select>
+      </div>
+      <button type="submit" class="btn btn-primary btn-full">Create Fixed Deposit</button>
+    </form>
+  </div>
+
+  <!-- MY FDs -->
+  <div class="card">
+    <h3 class="card-title">My Fixed Deposits</h3>
+    {% if fds %}
+      {% for fd in fds %}
+      <div class="fd-item {% if fd.status == 'active' %}fd-active{% elif fd.status == 'matured' %}fd-matured{% else %}fd-withdrawn{% endif %}">
+        <div style="display:flex;justify-content:space-between;align-items:center;">
+          <div>
+            <div style="font-weight:600;font-size:1.05rem;">₹{{ "%.2f"|format(fd.amount) }}</div>
+            <div style="font-size:0.8rem;color:var(--muted)">
+              {{ fd.duration_months }} months @ {{ fd.rate }}% → ₹{{ "%.2f"|format(fd.maturity_amount) }}
+            </div>
+            <div style="font-size:0.78rem;color:var(--muted);margin-top:0.2rem;">
+              {{ fd.start_date.strftime('%d %b %Y') }} → {{ fd.maturity_date.strftime('%d %b %Y') }}
+            </div>
+          </div>
+          <div style="text-align:right;">
+            <span class="badge {% if fd.status=='active' %}badge-deposit{% elif fd.status=='withdrawn' %}badge-withdrawal{% else %}badge-transfer{% endif %}">
+              {{ fd.status|capitalize }}
+            </span>
+            {% if fd.status == 'active' %}
+            <form method="post" action="/fd/withdraw/{{ fd.fd_id }}" style="margin-top:0.5rem;">
+              <button type="submit" class="btn btn-outline" style="font-size:0.78rem;padding:0.3rem 0.7rem;"
+                onclick="return confirm('Withdraw this FD early?')">Withdraw</button>
+            </form>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+      {% endfor %}
+    {% else %}
+      <p style="color:var(--muted);font-size:0.9rem;">No fixed deposits yet.</p>
+    {% endif %}
+  </div>
+</div>
+
+<div style="margin-top:1rem;"><a href="/dashboard" class="btn btn-outline">← Back to Dashboard</a></div>
+
+{% endblock %}

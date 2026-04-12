@@ -1,0 +1,181 @@
+{% extends "base.html" %}
+{% block title %}ITB Bank – All Accounts{% endblock %}
+{% block content %}
+
+<h1 class="page-title">🔐 All Account Details</h1>
+<p style="color:var(--muted);margin-bottom:1.25rem;font-size:0.85rem;">
+  Admin-only view — showing all customer accounts with full details.
+</p>
+
+<div class="table-card">
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;flex-wrap:wrap;gap:0.5rem;">
+    <h3>Customer Accounts ({{ data|length }})</h3>
+    <div style="display:flex;gap:0.5rem;flex-wrap:wrap;align-items:center;">
+      <input type="text" id="showSearch" placeholder="🔍 Search..."
+             oninput="filterShow()"
+             style="padding:0.4rem 0.75rem;border:1px solid var(--border);border-radius:6px;font-size:0.85rem;width:220px;"/>
+      <select id="sortSelect" onchange="sortTable()" style="padding:0.4rem 0.6rem;border:1px solid var(--border);border-radius:6px;font-size:0.85rem;">
+        <option value="">Sort by...</option>
+        <option value="name-asc">Name A→Z</option>
+        <option value="name-desc">Name Z→A</option>
+        <option value="balance-desc">Balance ↓</option>
+        <option value="balance-asc">Balance ↑</option>
+        <option value="cibil-desc">CIBIL ↓</option>
+        <option value="cibil-asc">CIBIL ↑</option>
+        <option value="loan-desc">Loan ↓</option>
+        <option value="loan-asc">Loan ↑</option>
+      </select>
+    </div>
+  </div>
+  {% if data %}
+  <div style="overflow-x:auto; cursor: grab; padding-bottom: 0.5rem;" id="dragScrollContainer">
+  <table id="showTable">
+    <thead>
+      <tr>
+        <th>#</th>
+        <th onclick="sortByCol(1)" style="cursor:pointer;">Name ↕</th>
+        <th>Email</th>
+        <th>Phone</th>
+        <th>PIN</th>
+        <th>Account No.</th>
+        <th>Type</th>
+        <th onclick="sortByCol(7)" style="cursor:pointer;">Balance ↕</th>
+        <th onclick="sortByCol(8)" style="cursor:pointer;">CIBIL ↕</th>
+        <th onclick="sortByCol(9)" style="cursor:pointer;">Loan ↕</th>
+        <th style="min-width: 110px; text-align: center; position: sticky; right: 0; background: var(--white); box-shadow: -2px 0 5px rgba(0,0,0,0.05); z-index: 2;">Actions</th>
+      </tr>
+    </thead>
+    <tbody id="showTbody">
+      {% for row in data %}
+      <tr data-name="{{ row.name }}" data-balance="{{ row.balance }}" data-cibil="{{ row.credit_score }}" data-loan="{{ row.active_loan_amt }}">
+        <td style="color:var(--muted);font-size:0.8rem;">{{ loop.index }}</td>
+        <td><strong>{{ row.name }}</strong></td>
+        <td style="font-size:0.82rem;color:var(--muted);">{{ row.email }}</td>
+        <td style="font-size:0.82rem;color:var(--muted);">{{ row.phone or '—' }}</td>
+        <td>
+          <div class="pin-cell">
+            <span class="pin-dots">••••</span>
+            <span class="pin-value" style="display:none;">{{ row.password }}</span>
+            <span class="eye-btn" data-index="{{ loop.index }}" onclick="togglePinRow(this)">👁</span>
+          </div>
+        </td>
+        <td style="font-size:0.83rem;letter-spacing:0.04em;">{{ row.account_number }}</td>
+        <td><span class="badge" style="background:#eaf3fd;color:#1a73e8;text-transform:capitalize;">{{ row.account_type }}</span></td>
+        <td style="font-weight:600;color:var(--success);">₹{{ "%.2f"|format(row.balance) }}</td>
+        <td><span class="cibil-pill">{{ row.credit_score }}</span><br><small>{{ row.cibil_band }}</small></td>
+        <td style="color:{% if row.active_loan_amt > 0 %}#e74c3c{% else %}var(--muted){% endif %};">
+          {% if row.active_loan_amt > 0 %}₹{{ "%.2f"|format(row.active_loan_amt) }}{% else %}None{% endif %}
+        </td>
+        <td style="min-width: 110px; text-align: center; position: sticky; right: 0; background: var(--white); box-shadow: -2px 0 5px rgba(0,0,0,0.05); z-index: 1;">
+          <a href="/admin/user/{{ row.user_id }}/loans" class="btn btn-outline" style="padding:0.25rem 0.6rem; font-size:0.75rem; white-space: nowrap !important; display: inline-block;">View Loans</a>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  </div>
+  {% else %}
+  <p style="color:var(--muted);padding:1rem 0;">No customer accounts found.</p>
+  {% endif %}
+</div>
+
+<div style="margin-top:1rem;">
+  <a href="/admin" class="btn btn-outline">← Back to Admin Panel</a>
+</div>
+
+<script>
+function togglePinRow(btn) {
+  var cell  = btn.parentElement;
+  var dots  = cell.querySelector('.pin-dots');
+  var value = cell.querySelector('.pin-value');
+  if (dots.style.display === 'none') {
+    dots.style.display  = 'inline';
+    value.style.display = 'none';
+    btn.textContent     = '👁';
+  } else {
+    dots.style.display  = 'none';
+    value.style.display = 'inline';
+    btn.textContent     = '🙈';
+  }
+}
+
+function filterShow() {
+  var q    = document.getElementById('showSearch').value.toLowerCase();
+  var rows = document.querySelectorAll('#showTbody tr');
+  rows.forEach(function(row) {
+    row.style.display = row.innerText.toLowerCase().includes(q) ? '' : 'none';
+  });
+}
+
+function sortTable() {
+  var val   = document.getElementById('sortSelect').value;
+  var tbody = document.getElementById('showTbody');
+  var rows  = Array.from(tbody.querySelectorAll('tr'));
+  if (!val) return;
+
+  rows.sort(function(a, b) {
+    if (val === 'name-asc')     return a.dataset.name.localeCompare(b.dataset.name);
+    if (val === 'name-desc')    return b.dataset.name.localeCompare(a.dataset.name);
+    if (val === 'balance-desc') return parseFloat(b.dataset.balance) - parseFloat(a.dataset.balance);
+    if (val === 'balance-asc')  return parseFloat(a.dataset.balance) - parseFloat(b.dataset.balance);
+    if (val === 'cibil-desc')   return parseInt(b.dataset.cibil)     - parseInt(a.dataset.cibil);
+    if (val === 'cibil-asc')    return parseInt(a.dataset.cibil)     - parseInt(b.dataset.cibil);
+    if (val === 'loan-desc')    return parseFloat(b.dataset.loan)    - parseFloat(a.dataset.loan);
+    if (val === 'loan-asc')     return parseFloat(a.dataset.loan)    - parseFloat(b.dataset.loan);
+    return 0;
+  });
+  rows.forEach(function(r) { tbody.appendChild(r); });
+}
+
+var colSortState = {};
+function sortByCol(colIndex) {
+  var tbody = document.getElementById('showTbody');
+  var rows  = Array.from(tbody.querySelectorAll('tr'));
+  var asc   = !colSortState[colIndex];
+  colSortState[colIndex] = asc;
+
+  rows.sort(function(a, b) {
+    var aVal = a.cells[colIndex].innerText.replace(/[₹,]/g,'').trim();
+    var bVal = b.cells[colIndex].innerText.replace(/[₹,]/g,'').trim();
+    var aNum = parseFloat(aVal);
+    var bNum = parseFloat(bVal);
+    if (!isNaN(aNum) && !isNaN(bNum)) {
+      return asc ? aNum - bNum : bNum - aNum;
+    }
+    return asc ? aVal.localeCompare(bVal) : bVal.localeCompare(aVal);
+  });
+  rows.forEach(function(r) { tbody.appendChild(r); });
+}
+
+// ── DRAG TO SCROLL ──
+const slider = document.getElementById('dragScrollContainer');
+if (slider) {
+  let isDown = false;
+  let startX;
+  let scrollLeft;
+
+  slider.addEventListener('mousedown', (e) => {
+    isDown = true;
+    slider.style.cursor = 'grabbing';
+    startX = e.pageX - slider.offsetLeft;
+    scrollLeft = slider.scrollLeft;
+  });
+  slider.addEventListener('mouseleave', () => {
+    isDown = false;
+    slider.style.cursor = 'grab';
+  });
+  slider.addEventListener('mouseup', () => {
+    isDown = false;
+    slider.style.cursor = 'grab';
+  });
+  slider.addEventListener('mousemove', (e) => {
+    if (!isDown) return;
+    e.preventDefault();
+    const x = e.pageX - slider.offsetLeft;
+    const walk = (x - startX) * 2; 
+    slider.scrollLeft = scrollLeft - walk;
+  });
+}
+</script>
+
+{% endblock %}

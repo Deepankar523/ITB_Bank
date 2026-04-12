@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+{% block title %}ITB Bank – Dashboard{% endblock %}
+{% block content %}
+
+<h1 class="page-title">Welcome, {{ session.name }} 👋</h1>
+
+{% if account %}
+<div class="balance-card">
+  <div class="balance-label">Account Balance</div>
+  <div class="balance-amount">₹{{ "%.2f"|format(account.balance) }}</div>
+  <div class="balance-meta">
+    <span>{{ account.account_number }}</span>
+    <span style="text-transform:capitalize">{{ account.account_type }} Account</span>
+  </div>
+</div>
+
+<div class="action-grid">
+  <div class="action-card">
+    <h3>💰 Deposit</h3>
+    <form action="/deposit" method="post">
+      <div class="form-group">
+        <input type="number" name="amount" placeholder="Amount in ₹" min="1" required/>
+      </div>
+      <button type="submit" class="btn btn-primary btn-full">Deposit</button>
+    </form>
+  </div>
+
+  <div class="action-card">
+    <h3>🏧 Withdraw</h3>
+    <form action="/withdraw" method="post">
+      <div class="form-group">
+        <input type="number" name="amount" placeholder="Amount in ₹" min="1" required/>
+      </div>
+      <button type="submit" class="btn btn-outline btn-full">Withdraw</button>
+    </form>
+  </div>
+</div>
+
+<div class="quick-links">
+  <a href="/transfer" class="qlink">↔ Transfer Money</a>
+  <a href="/fd" class="qlink">🏦 Fixed Deposit</a>
+  <a href="/loan" class="qlink">💳 Apply Loan</a>
+  <a href="/history" class="qlink">📋 Transaction History</a>
+  <a href="/statement/pdf" class="qlink">📄 Download Statement</a>
+  <a href="/profile" class="qlink">👤 My Profile</a>
+  <a href="/logout" class="qlink qlink-red">🚪 Logout</a>
+</div>
+
+{% else %}
+<div class="form-card"><p>No account found. Please contact admin.</p></div>
+{% endif %}
+
+{% endblock %}

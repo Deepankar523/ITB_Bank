@@ -1,0 +1,101 @@
+{% extends "base.html" %}
+{% block title %}ITB Bank – Home{% endblock %}
+{% block content %}
+
+<!-- HERO -->
+<div class="hero">
+  <h1>Welcome to <span>ITB Bank</span></h1>
+  <p class="hero-sub">India's Trusted Banking Partner — Secure, Fast & Reliable</p>
+  <div class="hero-btns">
+    <a href="/create" class="btn btn-primary">Open Account</a>
+    <a href="/login" class="btn btn-outline">Login</a>
+  </div>
+</div>
+
+<!-- WHY ITB BANK -->
+<section class="section">
+  <h2 class="section-title">Why Choose ITB Bank?</h2>
+  <div class="features-grid">
+    <div class="feature-card">
+      <div class="feature-icon">🔒</div>
+      <h3>Bank-Grade Security</h3>
+      <p>Your money and data are protected with the highest level of encryption and PIN-based access control.</p>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">⚡</div>
+      <h3>Instant Transfers</h3>
+      <p>Send money to any ITB Bank account in seconds — no delays, no hassle, 24/7.</p>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">📊</div>
+      <h3>Full Transparency</h3>
+      <p>Track every transaction with a detailed history log. Know exactly where your money goes.</p>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">💼</div>
+      <h3>Savings & Current</h3>
+      <p>Choose between Savings or Current accounts based on your personal or business needs.</p>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">🏧</div>
+      <h3>Easy Deposits & Withdrawals</h3>
+      <p>Deposit and withdraw funds at any time directly from your online dashboard.</p>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">🤝</div>
+      <h3>Dedicated Support</h3>
+      <p>Our admin team monitors all activity to ensure smooth, safe, and reliable banking for everyone.</p>
+    </div>
+  </div>
+</section>
+
+<!-- STATS BANNER -->
+<section class="stats-banner">
+  <div class="stat">
+    <div class="stat-number">₹50Cr+</div>
+    <div class="stat-label">Deposits Managed</div>
+  </div>
+  <div class="stat">
+    <div class="stat-number">10,000+</div>
+    <div class="stat-label">Happy Customers</div>
+  </div>
+  <div class="stat">
+    <div class="stat-number">99.9%</div>
+    <div class="stat-label">Uptime Guaranteed</div>
+  </div>
+  <div class="stat">
+    <div class="stat-number">0 Fraud</div>
+    <div class="stat-label">Cases Reported</div>
+  </div>
+</section>
+
+<!-- HOW IT WORKS -->
+<section class="section">
+  <h2 class="section-title">How It Works</h2>
+  <div class="steps-grid">
+    <div class="step">
+      <div class="step-num">1</div>
+      <h3>Create Account</h3>
+      <p>Fill in your name, email, PIN and opening deposit (min ₹5000) to get started.</p>
+    </div>
+    <div class="step">
+      <div class="step-num">2</div>
+      <h3>Login Securely</h3>
+      <p>Use your email and PIN to access your personalized banking dashboard.</p>
+    </div>
+    <div class="step">
+      <div class="step-num">3</div>
+      <h3>Bank with Ease</h3>
+      <p>Deposit, withdraw, transfer funds and view your complete transaction history.</p>
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<div class="cta-box">
+  <h2>Ready to get started?</h2>
+  <p>Open your ITB Bank account today and experience banking done right.</p>
+  <a href="/create" class="btn btn-primary">Open Free Account</a>
+</div>
+
+{% endblock %}

@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% block title %}Account Created{% endblock %}
+{% block content %}
+<div class="form-page">
+  <div class="form-card" style="text-align:center;">
+    <div style="font-size:3rem;">✅</div>
+    <h2>Account Created Successfully!</h2>
+    <div class="info-box">
+      <p><strong>Account Number:</strong> {{ acc }}</p>
+      <p><strong>Opening Balance:</strong> ₹{{ "%.2f"|format(amount) }}</p>
+    </div>
+    <p style="color:#666;font-size:0.9rem;">Save your account number. You'll need it to receive transfers.</p>
+    <a href="/login" class="btn btn-primary">Login Now</a>
+  </div>
+</div>
+{% endblock %}

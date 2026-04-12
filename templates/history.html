@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+{% block title %}ITB Bank – History{% endblock %}
+{% block content %}
+
+<h1 class="page-title">Transaction History</h1>
+<p style="color:#666;margin-bottom:1rem;">Account: <strong>{{ account_number }}</strong></p>
+
+<div class="table-card">
+  {% if transactions %}
+  <table>
+    <thead>
+      <tr>
+        <th>#</th>
+        <th>Type</th>
+        <th>From</th>
+        <th>To</th>
+        <th>Amount</th>
+        <th>Description</th>
+        <th>Date</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for t in transactions %}
+      <tr>
+        <td>{{ t.txn_id }}</td>
+        <td><span class="badge badge-{{ t.txn_type }}">{{ t.txn_type|capitalize }}</span></td>
+        <td>{{ t.from_account or '—' }}</td>
+        <td>{{ t.to_account or '—' }}</td>
+        <td>
+          {% if t.txn_type == 'deposit' or (t.txn_type == 'transfer' and t.to_account == account_number) %}
+            <span style="color:green;font-weight:600">+₹{{ "%.2f"|format(t.amount) }}</span>
+          {% else %}
+            <span style="color:#e74c3c;font-weight:600">−₹{{ "%.2f"|format(t.amount) }}</span>
+          {% endif %}
+        </td>
+        <td>{{ t.description or '—' }}</td>
+        <td style="font-size:0.82rem;color:#888">{{ t.txn_date.strftime('%d %b %Y, %H:%M') }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% else %}
+  <p style="padding:1rem;color:#888">No transactions found.</p>
+  {% endif %}
+</div>
+
+<div style="margin-top:1rem;"><a href="/dashboard" class="btn btn-outline">← Back to Dashboard</a></div>
+
+{% endblock %}

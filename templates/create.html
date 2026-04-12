@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+{% block title %}ITB Bank – Create Account{% endblock %}
+{% block content %}
+
+<div class="form-page">
+  <div class="form-card">
+    <h2>Open a New Account</h2>
+    <p class="form-sub">Fill all fields. Minimum opening deposit is ₹5000.</p>
+
+    {% if errors %}
+    <div class="alert alert-error">
+      {% for e in errors %}<div>⚠ {{ e }}</div>{% endfor %}
+    </div>
+    {% endif %}
+
+    <form method="post">
+      <div class="form-group">
+        <label>Full Name <span class="req">*</span></label>
+        <input type="text" name="name" placeholder="Your full name" value="{{ name }}" required/>
+      </div>
+      <div class="form-group">
+        <label>Email Address <span class="req">*</span></label>
+        <input type="email" name="email" placeholder="e.g. john@gmail.com" value="{{ email }}" required/>
+        <small>Enter your full email including domain (e.g. @gmail.com, @yahoo.com)</small>
+      </div>
+      <div class="form-group">
+        <label>PIN <span class="req">*</span></label>
+        <div class="input-eye">
+          <input type="password" name="pin" id="pin" placeholder="Create a PIN" required/>
+          <span class="eye-btn" onclick="toggleEye('pin', this)">👁</span>
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Account Type <span class="req">*</span></label>
+        <select name="account_type">
+          <option value="savings">Savings Account</option>
+          <option value="current">Current Account</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Opening Deposit (₹) <span class="req">*</span></label>
+        <input type="number" name="amount" placeholder="Minimum ₹5000" value="{{ amount }}" min="5000" required/>
+      </div>
+      <button type="submit" class="btn btn-primary btn-full">Create Account</button>
+    </form>
+
+    <div class="form-footer">
+      <a href="/login">Already have an account? Login</a>
+    </div>
+  </div>
+</div>
+
+{% endblock %}
