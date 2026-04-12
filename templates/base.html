@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>{% block title %}ITB Bank{% endblock %}</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+
+<nav class="navbar">
+  <div class="nav-brand">🏦 ITB Bank</div>
+  <div class="nav-links">
+    {% if session.user_id %}
+      {% if session.role == 'admin' %}
+        <a href="/admin">Admin Panel</a>
+        <a href="/show">All Accounts</a>
+      {% else %}
+        <a href="/dashboard">Dashboard</a>
+        <a href="/transfer">Transfer</a>
+        <a href="/history">History</a>
+        <a href="/fd">Fixed Deposit</a>
+        <a href="/loan">Loans</a>
+        <a href="/profile">Profile</a>
+      {% endif %}
+      <a href="/logout" class="btn-nav-logout">Logout</a>
+    {% else %}
+      <a href="/">Home</a>
+      <a href="/create">Open Account</a>
+      <a href="/login">Login</a>
+      <a href="/delete">Delete Account</a>
+    {% endif %}
+  </div>
+</nav>
+
+<div class="main-content">
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% for cat, msg in messages %}
+      <div class="alert alert-{{ cat }}">{{ msg }}</div>
+    {% endfor %}
+  {% endwith %}
+
+  {% block content %}{% endblock %}
+</div>
+
+<script src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
+</html>
