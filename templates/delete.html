@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% block title %}ITB Bank – Delete Account{% endblock %}
+{% block content %}
+
+<div class="form-page">
+  <div class="form-card">
+    <h2>Delete Account</h2>
+    <p class="form-sub">Enter your username or full email to close your account.</p>
+
+    {% if error %}
+    <div class="alert alert-error">⚠ {{ error }}</div>
+    {% endif %}
+
+    <form method="post">
+      <div class="form-group">
+        <label>Email / Username</label>
+        <input type="text" name="email" placeholder="e.g. john or john@gmail.com" required/>
+        <small>itb.org accounts: just type username. Others: type full email.</small>
+      </div>
+      <button type="submit" class="btn btn-danger btn-full">Delete Account</button>
+    </form>
+
+    <div class="form-footer">
+      <a href="/">Back to Home</a>
+    </div>
+  </div>
+</div>
+
+{% endblock %}
