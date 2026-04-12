@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+{% block title %}ITB Bank – User Loan Details{% endblock %}
+{% block content %}
+
+<h1 class="page-title">🔍 Loan Details: {{ user_info.name }}</h1>
+<p style="color:var(--muted);margin-bottom:1.25rem;font-size:0.85rem;">
+  Email: {{ user_info.email }} &nbsp;|&nbsp; Account: {{ user_info.account_number }}
+</p>
+
+<div class="table-card">
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;flex-wrap:wrap;gap:0.5rem;">
+    <h3>Loan History ({{ loans|length }})</h3>
+  </div>
+  {% if loans %}
+  <div style="overflow-x:auto;">
+    <table>
+      <thead>
+        <tr>
+          <th>Loan ID</th>
+          <th>Amount Given</th>
+          <th>Purpose</th>
+          <th>Duration & Rate</th>
+          <th>Total Due</th>
+          <th>Cleared / Paid</th>
+          <th>Remaining</th>
+          <th>Status</th>
+          <th>Applied On</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for l in loans %}
+        <tr>
+          <td><strong>#{{ l.loan_id }}</strong></td>
+          <td style="font-weight:600;color:var(--primary);">₹{{ "%.2f"|format(l.amount) }}</td>
+          <td>{{ l.purpose }}</td>
+          <td style="font-size:0.85rem;color:var(--muted);">{{ l.duration_months }}m @ {{ l.interest_rate }}%</td>
+          <td style="font-weight:600;color:var(--danger);">₹{{ "%.2f"|format(l.total_due) }}</td>
+          <td style="font-weight:600;color:var(--success);">₹{{ "%.2f"|format(l.amount_paid) }}</td>
+          <td style="font-weight:600;">₹{{ "%.2f"|format(l.remaining) }}</td>
+          <td>
+            <span class="badge 
+              {% if l.status == 'approved' %}badge-deposit
+              {% elif l.status == 'closed' %}badge-transfer
+              {% elif l.status == 'rejected' %}badge-withdrawal
+              {% else %}badge-withdrawal{% endif %}">
+              {{ l.status|capitalize }}
+            </span>
+          </td>
+          <td style="font-size:0.82rem;color:var(--muted);">{{ l.applied_at.strftime('%d %b %Y') }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <p style="color:var(--muted);padding:1rem 0;">No loans found for this user.</p>
+  {% endif %}
+</div>
+
+<div style="margin-top:1rem; display:flex; gap:0.5rem;">
+  <button onclick="history.back()" class="btn btn-outline">← Go Back</button>
+</div>
+
+{% endblock %}
