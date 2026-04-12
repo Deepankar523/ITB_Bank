@@ -1,0 +1,241 @@
+{% extends "base.html" %}
+{% block title %}ITB Bank – Admin Panel{% endblock %}
+{% block content %}
+
+<h1 class="page-title">🛡️ Admin Dashboard</h1>
+
+<!-- STATS -->
+<div class="stats-row">
+  <div class="stat-card">
+    <div class="stat-num">{{ total_users }}</div>
+    <div class="stat-lbl">Total Customers</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-num">₹{{ "%.0f"|format(total_balance) }}</div>
+    <div class="stat-lbl">Total Deposits Held</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-num">{{ total_txns }}</div>
+    <div class="stat-lbl">Total Transactions</div>
+  </div>
+</div>
+
+<!-- PENDING LOANS -->
+{% if pending_loans %}
+<div class="table-card" style="margin-bottom:1.5rem;border-left:4px solid #f39c12;">
+  <h3 style="margin-bottom:1rem;color:#b7770d;">⏳ Pending Loan Approvals ({{ pending_loans|length }})</h3>
+  {% for l in pending_loans %}
+  <div class="pending-badge">
+    <div>
+      <strong>{{ l.uname }}</strong> &mdash; ₹{{ "%.2f"|format(l.amount) }} for <em>{{ l.purpose }}</em>
+      <span style="margin-left:0.75rem;color:var(--muted);font-size:0.78rem;">
+        {{ l.duration_months }} months &nbsp;|&nbsp; CIBIL: <strong>{{ l.credit_score }}</strong>
+      </span>
+    </div>
+    <div style="display:flex;gap:0.5rem;">
+      <a href="/admin/loan/{{ l.loan_id }}/approve" class="btn btn-primary" style="font-size:0.8rem;padding:0.3rem 0.8rem;">✓ Approve</a>
+      <a href="/admin/loan/{{ l.loan_id }}/reject"  class="btn btn-danger"  style="font-size:0.8rem;padding:0.3rem 0.8rem;">✗ Reject</a>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+{% endif %}
+
+<!-- ALL CUSTOMERS TABLE -->
+<div class="table-card" style="margin-bottom:1.5rem;">
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;flex-wrap:wrap;gap:0.5rem;">
+    <h3>All Customer Accounts</h3>
+    <div style="display:flex;gap:0.5rem;flex-wrap:wrap;align-items:center;">
+      <input type="text" id="searchBox" placeholder="🔍 Search name / email / account..."
+             oninput="filterTable()" style="padding:0.4rem 0.75rem;border:1px solid var(--border);border-radius:6px;font-size:0.85rem;width:240px;"/>
+      <select id="sortSelect" onchange="sortTable()" style="padding:0.4rem 0.6rem;border:1px solid var(--border);border-radius:6px;font-size:0.85rem;">
+        <option value="">Sort by...</option>
+        <option value="name-asc">Name A→Z</option>
+        <option value="name-desc">Name Z→A</option>
+        <option value="balance-desc">Balance ↓</option>
+        <option value="balance-asc">Balance ↑</option>
+        <option value="cibil-desc">CIBIL Score ↓</option>
+        <option value="cibil-asc">CIBIL Score ↑</option>
+        <option value="loan-desc">Loan Amount ↓</option>
+        <option value="loan-asc">Loan Amount ↑</option>
+      </select>
+      <a href="/show" class="btn btn-primary" style="font-size:0.82rem;padding:0.4rem 0.9rem;">View PINs</a>
+    </div>
+  </div>
+
+  <div style="overflow-x:auto; cursor: grab; padding-bottom: 0.5rem;" id="adminScrollContainer">
+  <table id="customerTable">
+    <thead>
+      <tr>
+        <th onclick="sortByCol(0)" class="sortable-th">Name ↕</th>
+        <th>Email</th>
+        <th>Phone</th>
+        <th>Account No.</th>
+        <th>Type</th>
+        <th onclick="sortByCol(5)" class="sortable-th">Balance ↕</th>
+        <th onclick="sortByCol(6)" class="sortable-th">CIBIL Score ↕</th>
+        <th>CIBIL Band</th>
+        <th onclick="sortByCol(8)" class="sortable-th">Active Loan ↕</th>
+        <th>Loan Paid</th>
+        <th>Member Since</th>
+        <th style="min-width: 110px; text-align: center; position: sticky; right: 0; background: var(--white); box-shadow: -2px 0 5px rgba(0,0,0,0.05); z-index: 2;">Actions</th>
+      </tr>
+    </thead>
+    <tbody id="customerTbody">
+      {% for c in customers %}
+      <tr
+        data-name="{{ c.name }}"
+        data-balance="{{ c.balance }}"
+        data-cibil="{{ c.credit_score }}"
+        data-loan="{{ c.active_loan_amt }}"
+      >
+        <td><strong>{{ c.name }}</strong></td>
+        <td style="font-size:0.82rem;color:var(--muted)">{{ c.email }}</td>
+        <td style="font-size:0.82rem;color:var(--muted)">{{ c.phone or '—' }}</td>
+        <td style="font-size:0.83rem;letter-spacing:0.04em">{{ c.account_number }}</td>
+        <td><span class="badge" style="background:#eaf3fd;color:#1a73e8;text-transform:capitalize">{{ c.account_type }}</span></td>
+        <td style="font-weight:600;color:var(--success)">₹{{ "%.2f"|format(c.balance) }}</td>
+        <td>
+          <span class="cibil-pill
+            {% if c.cibil_band == 'Excellent' %}cibil-excellent
+            {% elif c.cibil_band == 'Good' %}cibil-good
+            {% elif c.cibil_band == 'Fair' %}cibil-fair
+            {% else %}cibil-poor{% endif %}">
+            {{ c.credit_score }}
+          </span>
+        </td>
+        <td>
+          <span class="badge
+            {% if c.cibil_band == 'Excellent' %}badge-deposit
+            {% elif c.cibil_band == 'Good' %}badge-deposit
+            {% elif c.cibil_band == 'Fair' %}badge-transfer
+            {% else %}badge-withdrawal{% endif %}">
+            {{ c.cibil_band }}
+          </span>
+        </td>
+        <td style="color:{% if c.active_loan_amt > 0 %}#e74c3c{% else %}var(--muted){% endif %};font-weight:{% if c.active_loan_amt > 0 %}600{% else %}400{% endif %}">
+          {% if c.active_loan_amt > 0 %}₹{{ "%.2f"|format(c.active_loan_amt) }}{% else %}None{% endif %}
+        </td>
+        <td style="color:var(--muted);font-size:0.85rem">
+          {% if c.loan_paid > 0 %}₹{{ "%.2f"|format(c.loan_paid) }}{% else %}—{% endif %}
+        </td>
+        <td style="color:var(--muted);font-size:0.82rem">{{ c.created_at.strftime('%d %b %Y') }}</td>
+        <td style="min-width: 110px; text-align: center; position: sticky; right: 0; background: var(--white); box-shadow: -2px 0 5px rgba(0,0,0,0.05); z-index: 1;">
+          <a href="/admin/user/{{ c.user_id }}/loans" class="btn btn-outline" style="padding:0.25rem 0.6rem; font-size:0.75rem; white-space: nowrap !important; display: inline-block;">View Loans</a>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  </div>
+</div>
+
+<!-- RECENT TRANSACTIONS -->
+<div class="table-card">
+  <h3 style="margin-bottom:1rem;">Recent Transactions (Last 15)</h3>
+  <div style="overflow-x:auto;">
+  <table>
+    <thead>
+      <tr><th>ID</th><th>Type</th><th>From</th><th>To</th><th>Amount</th><th>Date</th></tr>
+    </thead>
+    <tbody>
+      {% for t in recent_txns %}
+      <tr>
+        <td style="color:var(--muted);font-size:0.8rem">{{ t.txn_id }}</td>
+        <td><span class="badge badge-{{ t.txn_type }}">{{ t.txn_type|capitalize }}</span></td>
+        <td style="font-size:0.82rem;color:var(--muted)">{{ t.from_account or '—' }}</td>
+        <td style="font-size:0.82rem;color:var(--muted)">{{ t.to_account or '—' }}</td>
+        <td style="font-weight:600">₹{{ "%.2f"|format(t.amount) }}</td>
+        <td style="font-size:0.82rem;color:var(--muted)">{{ t.txn_date.strftime('%d %b %Y, %H:%M') }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  </div>
+</div>
+
+<script>
+// ── SEARCH ──────────────────────────────────
+function filterTable() {
+  var q    = document.getElementById('searchBox').value.toLowerCase();
+  var rows = document.querySelectorAll('#customerTbody tr');
+  rows.forEach(function(row) {
+    var text = row.innerText.toLowerCase();
+    row.style.display = text.includes(q) ? '' : 'none';
+  });
+}
+
+// ── SORT BY SELECT ───────────────────────────
+function sortTable() {
+  var val   = document.getElementById('sortSelect').value;
+  var tbody = document.getElementById('customerTbody');
+  var rows  = Array.from(tbody.querySelectorAll('tr'));
+  if (!val) return;
+
+  rows.sort(function(a, b) {
+    if (val === 'name-asc')     return a.dataset.name.localeCompare(b.dataset.name);
+    if (val === 'name-desc')    return b.dataset.name.localeCompare(a.dataset.name);
+    if (val === 'balance-desc') return parseFloat(b.dataset.balance) - parseFloat(a.dataset.balance);
+    if (val === 'balance-asc')  return parseFloat(a.dataset.balance) - parseFloat(b.dataset.balance);
+    if (val === 'cibil-desc')   return parseInt(b.dataset.cibil)     - parseInt(a.dataset.cibil);
+    if (val === 'cibil-asc')    return parseInt(a.dataset.cibil)     - parseInt(b.dataset.cibil);
+    if (val === 'loan-desc')    return parseFloat(b.dataset.loan)    - parseFloat(a.dataset.loan);
+    if (val === 'loan-asc')     return parseFloat(a.dataset.loan)    - parseFloat(b.dataset.loan);
+    return 0;
+  });
+  rows.forEach(function(r) { tbody.appendChild(r); });
+}
+
+// ── SORT BY COLUMN CLICK ─────────────────────
+var colSortState = {};
+function sortByCol(colIndex) {
+  var tbody = document.getElementById('customerTbody');
+  var rows  = Array.from(tbody.querySelectorAll('tr'));
+  var asc   = !colSortState[colIndex];
+  colSortState[colIndex] = asc;
+
+  rows.sort(function(a, b) {
+    var aVal = a.cells[colIndex].innerText.replace(/[₹,]/g,'').trim();
+    var bVal = b.cells[colIndex].innerText.replace(/[₹,]/g,'').trim();
+    var aNum = parseFloat(aVal);
+    var bNum = parseFloat(bVal);
+    if (!isNaN(aNum) && !isNaN(bNum)) {
+      return asc ? aNum - bNum : bNum - aNum;
+    }
+    return asc ? aVal.localeCompare(bVal) : bVal.localeCompare(aVal);
+  });
+  rows.forEach(function(r) { tbody.appendChild(r); });
+}
+
+// ── DRAG TO SCROLL ──
+const adminSlider = document.getElementById('adminScrollContainer');
+if (adminSlider) {
+  let adminIsDown = false;
+  let adminStartX;
+  let adminScrollLeft;
+
+  adminSlider.addEventListener('mousedown', (e) => {
+    adminIsDown = true;
+    adminSlider.style.cursor = 'grabbing';
+    adminStartX = e.pageX - adminSlider.offsetLeft;
+    adminScrollLeft = adminSlider.scrollLeft;
+  });
+  adminSlider.addEventListener('mouseleave', () => {
+    adminIsDown = false;
+    adminSlider.style.cursor = 'grab';
+  });
+  adminSlider.addEventListener('mouseup', () => {
+    adminIsDown = false;
+    adminSlider.style.cursor = 'grab';
+  });
+  adminSlider.addEventListener('mousemove', (e) => {
+    if (!adminIsDown) return;
+    e.preventDefault();
+    const x = e.pageX - adminSlider.offsetLeft;
+    const walk = (x - adminStartX) * 2; 
+    adminSlider.scrollLeft = adminScrollLeft - walk;
+  });
+}
+</script>
+
+{% endblock %}
