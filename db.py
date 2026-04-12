@@ -4,10 +4,9 @@ import os
 
 def get_db_connection():
     return mysql.connector.connect(
-        host=os.getenv("DB_HOST"),
-        user=os.getenv("DB_USER"),
-        password=os.getenv("DB_PASSWORD"),
-        database=os.getenv("DB_NAME"),
+        host="sql12.freesqldatabase.com",
+        user="sql12822951",
+        password="Sitarama010874",
+        database="sql12822951",
         port=3306
     )
-
