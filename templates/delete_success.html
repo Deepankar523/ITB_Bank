@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% block title %}Account Deleted{% endblock %}
+{% block content %}
+<div class="form-page">
+  <div class="form-card" style="text-align:center;">
+    <div style="font-size:3rem;">🗑️</div>
+    <h2>Account Deleted</h2>
+    <div class="info-box">
+      <p>Remaining balance of <strong>₹{{ "%.2f"|format(balance) }}</strong> has been returned.</p>
+    </div>
+    <a href="/" class="btn btn-primary">Back to Home</a>
+  </div>
+</div>
+{% endblock %}
