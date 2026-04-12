@@ -122,13 +122,31 @@ def admin():
     db = get_db_connection()
     cur = db.cursor(dictionary=True)
 
+    # total users
+    cur.execute("SELECT COUNT(*) as c FROM users WHERE role='customer'")
+    total_users = cur.fetchone()['c']
+
+    # total balance
+    cur.execute("SELECT COALESCE(SUM(balance),0) as s FROM accounts")
+    total_balance = float(cur.fetchone()['s'])
+
+    # total transactions
+    cur.execute("SELECT COUNT(*) as c FROM transactions")
+    total_txns = cur.fetchone()['c']
+
+    # customers
     cur.execute("SELECT * FROM users WHERE role!='admin'")
     customers = cur.fetchall()
 
     db.close()
 
-    return render_template('admin.html', customers=customers)
-
+    return render_template(
+        'admin.html',
+        customers=customers,
+        total_users=total_users,
+        total_balance=total_balance,
+        total_txns=total_txns
+    )
 # ───────── SHOW (FIXED) ─────────
 
 @app.route('/show')
