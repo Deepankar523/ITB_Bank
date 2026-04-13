@@ -47,11 +47,12 @@ def ensure_admin():
         db.commit()
     db.close()
 
-def calc_credit_score(db,user_id):
+def calc_credit_score(user_id):
     """
     Returns (score 300-900, band str, auto_approve bool)
     Factors: balance, account age, txn count, active/closed loans
     """
+    db  = get_db_connection()
     cur = db.cursor(dictionary=True)
 
     cur.execute(
