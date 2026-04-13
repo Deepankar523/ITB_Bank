@@ -1,13 +1,9 @@
-
 import mysql.connector
-import os
 
 def get_db_connection():
     return mysql.connector.connect(
-        host="sql12.freesqldatabase.com",
-        user="sql12822951",
-        password="NCvHVqAwpj",
-        database="sql12822951",
-        port=3306,
-        connection_timeout=5
+        host="localhost",
+        user="root",
+        password="sitarama010874",
+        database="banking_db"
     )
